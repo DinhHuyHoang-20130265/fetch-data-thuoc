@@ -1,0 +1,29 @@
+name: Đồng bộ SĐK thuốc hằng ngày
+
+on:
+  schedule:
+    # 21:00 UTC = 04:00 giờ Việt Nam (UTC+7) mỗi ngày.
+    - cron: "0 21 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Cài dependencies
+        run: pip install -r requirements.txt
+
+      - name: Lấy dữ liệu và ghi Google Sheet
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+          WORKSHEET_NAME: SoDangKy
+        run: python main.py
